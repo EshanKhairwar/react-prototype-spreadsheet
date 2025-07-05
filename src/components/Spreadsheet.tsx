@@ -1,13 +1,23 @@
 import React, { useMemo } from "react";
-import { useTable } from "react-table";
-import type { CellProps } from "react-table";
+import { useTable,  } from "react-table";
+
+import type { Column, CellProps } from 'react-table';
+
 import classNames from "classnames";
 
+interface RowData {
+  job: string;
+  submitted: string;
+  status: string;
+  submitter: string;
+  url: string;
+  assigned: string;
+  priority: string;
+  due: string;
+  value: string;
+}
 
-
-
-
-const data = [
+const data: RowData[] = [
   {
     job: "Launch social media campaign for product",
     submitted: "02-03-2023",
@@ -83,8 +93,8 @@ interface SpreadsheetProps {
   setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
 }
 
-const Spreadsheet: React.FC<SpreadsheetProps> = ({ searchQuery }) => {
-  const generateEmptyRows = (count: number) =>
+const Spreadsheet: React.FC<SpreadsheetProps> = ({ searchQuery, setSearchQuery }) => {
+  const generateEmptyRows = (count: number): RowData[] =>
     Array.from({ length: count }, () => ({
       job: "",
       submitted: "",
@@ -97,97 +107,104 @@ const Spreadsheet: React.FC<SpreadsheetProps> = ({ searchQuery }) => {
       value: "",
     }));
 
-
-// Adjust 25 to however many empty rows you want
-
-  const columns = useMemo(
-    () => [
-      {
-        Header: "#",
-        accessor: (_: any, i: number) => i + 1,
-        id: "rowNumber",
-      },
-      {
-        Header: "Job Request",
-        accessor: "job",
-      },
-      {
-        Header: "Submitted",
-        accessor: "submitted",
-      },
-      {
-        Header: "Status",
-        accessor: "status",
-        Cell: ({ value }: CellProps<any, string>) => (
-          <span
-            className={classNames(
-              "px-2 py-1 rounded text-xs font-medium",
-              statusColors[value] || "bg-gray-100 text-gray-800"
-            )}
-          >
-            {value}
-          </span>
-        ),
-      },
-      {
-        Header: "Submitter",
-        accessor: "submitter",
-      },
-      {
-        Header: "URL",
-        accessor: "url",
-        Cell: ({ value }: CellProps<any, string>) => (
-          <a
-            href={`https://${value}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-600 underline"
-          >
-            {value}
-          </a>
-        ),
-      },
-      {
-        Header: "Assigned",
-        accessor: "assigned",
-      },
-      {
-        Header: "Priority",
-        accessor: "priority",
-        Cell: ({ value }: CellProps<any, string>) => (
-          <span className={classNames("font-medium", priorityColors[value])}>
-            {value}
-          </span>
-        ),
-      },
-      {
-        Header: "Due Date",
-        accessor: "due",
-      },
-      {
-        Header: "Est. Value",
-        accessor: "value",
-      },
-    ],
-    []
-  );
-
-const filteredData = useMemo(() => {
-  return [...data, ...generateEmptyRows(25)].filter((row) => {
-    const values = Object.values(row)
-      .map((v) => (v ?? "").toString().toLowerCase()) // Convert undefined/null to empty string
-      .join(" ");
-return values.includes((searchQuery ?? "").toString().toLowerCase());
-
-  });
-}, [searchQuery]);
+const columns = useMemo<Column<RowData>[]>(
+  () => [
+    {
+      Header: "#",
+      id: "rowNumber",
+      Cell: ({ row }: CellProps<RowData>) => row.index + 1,
+    },
+    {
+      Header: "Job Request",
+      accessor: "job",
+    },
+    {
+      Header: "Submitted",
+      accessor: "submitted",
+    },
+    {
+      Header: "Status",
+      accessor: "status",
+      Cell: ({ value }: CellProps<RowData, string>) => (
+        <span
+          className={classNames(
+            "px-2 py-1 rounded text-xs font-medium",
+            statusColors[value] || "bg-gray-100 text-gray-800"
+          )}
+        >
+          {value}
+        </span>
+      ),
+    },
+    {
+      Header: "Submitter",
+      accessor: "submitter",
+    },
+    {
+      Header: "URL",
+      accessor: "url",
+      Cell: ({ value }: CellProps<RowData, string>) => (
+        <a
+          href={`https://${value}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 underline"
+        >
+          {value}
+        </a>
+      ),
+    },
+    {
+      Header: "Assigned",
+      accessor: "assigned",
+    },
+    {
+      Header: "Priority",
+      accessor: "priority",
+      Cell: ({ value }: CellProps<RowData, string>) => (
+        <span className={classNames("font-medium", priorityColors[value])}>
+          {value}
+        </span>
+      ),
+    },
+    {
+      Header: "Due Date",
+      accessor: "due",
+    },
+    {
+      Header: "Est. Value",
+      accessor: "value",
+    },
+  ],
+  []
+);
 
 
-const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
-  useTable({ columns, data: filteredData });
+  const filteredData = useMemo(() => {
+    return [...data, ...generateEmptyRows(25)].filter((row) => {
+      const values = Object.values(row)
+        .map((v) => (v ?? "").toString().toLowerCase())
+        .join(" ");
+      return values.includes(searchQuery.toLowerCase());
+    });
+  }, [searchQuery]);
+
+  const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
+    useTable<RowData>({ columns, data: filteredData });
 
   return (
-    <div className="w-screen h-screen overflow-auto font-[Segoe UI]">
+    <div className="w-screen h-screen overflow-auto font-[Segoe UI] p-4">
+      {/* Optional: Search input */}
+      <div className="mb-3">
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search..."
+          className="border border-gray-300 rounded px-3 py-1 w-64"
+        />
+      </div>
+
       <table
         {...getTableProps()}
         className="table-fixed border-collapse min-w-full text-[13px]"
@@ -206,6 +223,7 @@ const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
             </tr>
           ))}
         </thead>
+
         <tbody {...getTableBodyProps()}>
           {rows.map((row, rowIndex) => {
             prepareRow(row);
@@ -218,7 +236,7 @@ const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
                   <td
                     {...cell.getCellProps()}
                     className="border border-gray-300 px-3 py-2 align-top whitespace-nowrap"
-                    contentEditable={cell.column.id !== "url"} // Don't make URL column editable
+                    contentEditable={cell.column.id !== "url"} // URL column not editable
                     suppressContentEditableWarning={true}
                   >
                     {cell.render("Cell")}

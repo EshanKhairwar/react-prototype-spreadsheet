@@ -8,7 +8,7 @@ const SheetPage = () => {
   return (
     <div className="flex flex-col h-screen">
       <Topbar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-      <Spreadsheet searchQuery={searchQuery} />
+      <Spreadsheet searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
     </div>
   );
 };
