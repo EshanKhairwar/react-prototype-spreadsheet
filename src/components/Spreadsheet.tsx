@@ -1,6 +1,11 @@
-import React, { useMemo, useState } from "react";
-import { useTable, CellProps } from "react-table";
+import React, { useMemo } from "react";
+import { useTable } from "react-table";
+import type { CellProps } from "react-table";
 import classNames from "classnames";
+
+
+
+
 
 const data = [
   {
@@ -73,7 +78,12 @@ const priorityColors: Record<string, string> = {
   Low: "text-blue-600",
 };
 
-const Spreadsheet = ({ searchQuery }: { searchQuery: string }) => {
+interface SpreadsheetProps {
+  searchQuery: string;
+  setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
+}
+
+const Spreadsheet: React.FC<SpreadsheetProps> = ({ searchQuery }) => {
   const generateEmptyRows = (count: number) =>
     Array.from({ length: count }, () => ({
       job: "",
@@ -87,7 +97,7 @@ const Spreadsheet = ({ searchQuery }: { searchQuery: string }) => {
       value: "",
     }));
 
-  const allData = [...data, ...generateEmptyRows(25)];
+
 // Adjust 25 to however many empty rows you want
 
   const columns = useMemo(
