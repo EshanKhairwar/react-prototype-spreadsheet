@@ -1,6 +1,7 @@
-import React, { useState } from "react";
-import Topbar from "./Topbar";
+import { useState } from "react";
+
 import Spreadsheet from "./Spreadsheet";
+import Topbar from "./TopBar";
 
 const SheetPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
